@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Path maker</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<div id="settings">
+		<label>
+			Board width 
+			<input id="boardWidth" type="number" name="" placeholder="1-1000" min=1 max=1000 value=700>
+		</label>
+		<label>
+			Board height 
+			<input id="boardHeight" type="number" name="" placeholder="1-1000" min=1 max=1000 value=700>
+		</label>
+		<label><button id="clearCanvasBtn">Clear path</button></label>
+		<label><button id="copyPathCodeBtn">Copy Path as Java code</button></label>
+		<label><button id="copyPathCoordsBtn">Copy Path as list of "x, y"</button></label>
+	</div>
+	<div id="canvasContainer">
+		<canvas></canvas>
+	</div>
+<script type="text/javascript">
+	var canvas = document.querySelector("canvas");
+	var ctx = canvas.getContext('2d');
+	var boardWidthInput = document.querySelector("#boardWidth");
+	var boardHeightInput = document.querySelector("#boardHeight");
+	var clearCanvasBtn = document.querySelector("#clearCanvasBtn");
+	var copyPathCodeBtn = document.querySelector("#copyPathCodeBtn");
+	var copyPathCoordsBtn = document.querySelector("#copyPathCoordsBtn");
+
+	var mouseIsClicked = false;
+	var currentDistanceMoved = 0;
+	var pointerX = 0;
+	var pointerY = 0;
+	var pathCanvasHeight = canvas.height;
+
+	var points = [];
+	// var startPoint = [];
+	// var endPoint = [];
+
+	// --------------------------------------------------------
+
+	boardWidthInput.addEventListener("input", updateCanvasSize);
+	boardHeightInput.addEventListener("input", updateCanvasSize);
+	clearCanvasBtn.addEventListener("click", clearCanvas);
+	copyPathCodeBtn.addEventListener("click", () => {
+		copy(pointsAsJavaCode());
+	});
+	copyPathCoordsBtn.addEventListener("click", () => {
+		copy(pointsAsCoordList());
+	});
+
+	// canvas.addEventListener("click", canvasClick);
+	canvas.addEventListener("mousemove", canvasMove);
+	canvas.addEventListener("mousedown", (event) => {
+		clearCanvas();
+		mouseIsClicked = true;
+		pathCanvasHeight = canvas.height;
+		currentDistanceMoved = 0;
+		pointerX = event.offsetX;
+		pointerY = event.offsetY;
+		points = [];
+
+		// startPoint = [event.offsetX, event.offsetY];
+		newPoint(event.offsetX, event.offsetY);
+		drawBlob(event.offsetX, event.offsetY, "red")
+	});
+	canvas.addEventListener("mouseup", () => { 
+		mouseIsClicked = false;
+		pathCanvasHeight = canvas.height;
+		// endPoint = [event.offsetX, event.offsetY];
+		newPoint(event.offsetX, event.offsetY);
+		drawBlob(event.offsetX, event.offsetY, "magenta")
+		console.log("Ended path");
+	});
+
+
+	// --------------------------------------------------------
+
+	updateCanvasSize();
+
+	// --------------------------------------------------------
+
+	function copy(text) {
+		var textarea = document.createElement("textarea");
+		document.body.appendChild(textarea);
+		textarea.value = text;
+		textarea.select();
+		document.execCommand("copy");
+		document.body.removeChild(textarea);
+	}
+
+	function canvasMove(event) {
+		if (mouseIsClicked) {
+			var newX = event.offsetX;
+			var newY = event.offsetY;
+			currentDistanceMoved += distance(pointerX, pointerY, newX, newY);
+			if (currentDistanceMoved > 200) {
+				newPoint(newX, newY);
+				drawBlob(newX, newY, "blue");
+				currentDistanceMoved = 0
+				pointerX = newX;
+				pointerY = newY;
+			}
+		}
+	}
+
+	function newPoint(x, y) {
+		x = x <= 0 ? 0 : Math.min(x, canvas.width);
+		y = y <= 0 ? 0 : Math.min(y, canvas.height)
+		var newPoint = [x, y];
+		points.push(newPoint)
+		console.log("New point at: ", newPoint)
+		console.log(points);
+	}
+
+	function canvasClick(event) {
+		var x = event.offsetX;
+		var y = event.offsetY;
+		drawBlob(x, y, "blue");
+		console.log("BLUEEE", x, y);
+	}
+
+	function drawBlob(x, y, color) {
+		var radius = 4;
+
+		ctx.fillStyle = color;
+		ctx.beginPath();
+		ctx.arc(x, y, radius, 0, 2 * Math.PI);
+		ctx.fill();
+	}
+
+	function distance(prevX, prevY, newX, newY) {
+		var dx = prevX - newX;
+		var dy = prevY - newY;
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+
+	function updateCanvasSize() {
+		canvas.width = boardWidthInput.value;
+		canvas.height = boardHeightInput.value;
+	}
+	function clearCanvas() {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+	}
+
+	function pointsAsJavaCode() {
+		var javaCode = ""
+		points.forEach(point => {
+			[x, y] = point;
+			y = pathCanvasHeight - y;
+			javaCode += `nodes.add(new Node(new Point(${x}, ${y})));
+			`;
+		});
+
+		javaCode += `
+        
+        for (int i = 0; i < nodes.size() - 1; i++) {
+            nodes.get(i).addConnectedNode(nodes.get(i + 1));
+        }
+        startNode = nodes.get(0);
+        endNode = nodes.get(nodes.size() - 1);`;
+
+        return points.length > 0 ? javaCode : "";
+	}
+
+	function pointsAsCoordList() {
+		output = "";
+		points.forEach(point => {
+			[x, y] = point;
+			y = pathCanvasHeight - y;
+			output += `${x}, ${y}
+`;
+		});
+		return output;
+	}
+	
+
+</script>
+</body>
+</html>

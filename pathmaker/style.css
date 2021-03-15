@@ -1,0 +1,16 @@
+body {
+	background: #ccc;
+}
+canvas {
+	display: block;
+	border: 1px solid black;
+	margin: 1em auto;
+	background: white;
+}
+
+#settings {
+	position: absolute;
+}
+#settings label {
+	display: block;
+}
