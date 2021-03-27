@@ -15,8 +15,8 @@
 			<input id="boardHeight" type="number" name="" placeholder="1-1000" min=1 max=1000 value=700>
 		</label>
 		<label><button id="clearCanvasBtn">Clear path</button></label>
-		<label><button id="copyPathCodeBtn">Copy Path as Java code</button></label>
-		<label><button id="copyPathCoordsBtn">Copy Path as list of "x, y"</button></label>
+		<!--<label><button id="copyPathCodeBtn">Copy Path as Java code</button></label>-->
+		<label><button id="copyPathCoordsBtn">Copy Path as list of "x y"</button></label>
 	</div>
 	<div id="canvasContainer">
 		<canvas></canvas>
@@ -27,7 +27,7 @@
 	var boardWidthInput = document.querySelector("#boardWidth");
 	var boardHeightInput = document.querySelector("#boardHeight");
 	var clearCanvasBtn = document.querySelector("#clearCanvasBtn");
-	var copyPathCodeBtn = document.querySelector("#copyPathCodeBtn");
+	// var copyPathCodeBtn = document.querySelector("#copyPathCodeBtn");
 	var copyPathCoordsBtn = document.querySelector("#copyPathCoordsBtn");
 
 	var mouseIsClicked = false;
@@ -45,9 +45,9 @@
 	boardWidthInput.addEventListener("input", updateCanvasSize);
 	boardHeightInput.addEventListener("input", updateCanvasSize);
 	clearCanvasBtn.addEventListener("click", clearCanvas);
-	copyPathCodeBtn.addEventListener("click", () => {
-		copy(pointsAsJavaCode());
-	});
+	// copyPathCodeBtn.addEventListener("click", () => {
+	// 	copy(pointsAsJavaCode());
+	// });
 	copyPathCoordsBtn.addEventListener("click", () => {
 		copy(pointsAsCoordList());
 	});
